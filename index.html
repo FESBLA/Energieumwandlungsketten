@@ -1,0 +1,32 @@
+<!DOCTYPE html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Energiepfade Touch iPad</title><style>body{font-family:Segoe UI,Arial,sans-serif;background:linear-gradient(135deg,#edf7ed,#eef5ff);margin:0;padding:10px}h1{text-align:center;color:#1b4f72;font-size:1.5rem}.wrap{display:grid;grid-template-columns:1fr;gap:12px}@media(min-width:900px){.wrap{grid-template-columns:1fr 1fr}}.panel{background:#fff;border-radius:16px;padding:12px;box-shadow:0 2px 8px rgba(0,0,0,.15)}.targets,.pool{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}.slot,.card{width:110px;height:100px;border-radius:14px}.slot{border:3px dashed #b7c4cc;background:#fafafa}.card{color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;font-weight:700;cursor:pointer}.selected{outline:5px solid #ffeb3b;transform:scale(1.05)}.green{background:#2e7d32}.blue{background:#1565c0}.orange{background:#ef6c00}.gray{background:#546e7a}.eta{font-size:11px;background:rgba(255,255,255,.2);padding:2px 6px;border-radius:6px}svg{width:40px;height:40px}button{padding:10px 14px;border:none;border-radius:8px;background:#1565c0;color:#fff;margin:3px}</style></head><body><h1>⚡ Energieumwandlungsketten</h1><div style="text-align:center"><button onclick="shuffleCards()">🔀 Neu mischen</button><button onclick="showSolution()">💡 Lösung anzeigen</button></div><div class="wrap"><div class="panel"><h3>🔋 Elektroauto</h3><div id="ev" class="targets"></div><button onclick="checkEV()">Prüfen</button><div id="evr"></div></div><div class="panel"><h3>🧪 Brennstoffzellenauto</h3><div id="fc" class="targets"></div><button onclick="checkFC()">Prüfen</button><div id="fcr"></div></div></div><div class="panel" style="margin-top:12px"><h3>Kartenpool</h3><p>Karte antippen, dann Zielfeld antippen.</p><div id="pool" class="pool"></div></div><script>const W='<svg viewBox="0 0 100 100"><line x1="50" y1="20" x2="50" y2="90" stroke="white" stroke-width="6"/><circle cx="50" cy="30" r="5" fill="white"/><line x1="50" y1="30" x2="18" y2="20" stroke="white" stroke-width="5"/><line x1="50" y1="30" x2="78" y2="18" stroke="white" stroke-width="5"/><line x1="50" y1="30" x2="55" y2="62" stroke="white" stroke-width="5"/></svg>';const B='<svg viewBox="0 0 100 100"><rect x="25" y="25" width="45" height="50" fill="none" stroke="white" stroke-width="6"/></svg>';const M='<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="22" fill="none" stroke="white" stroke-width="6"/></svg>';const E='<svg viewBox="0 0 100 100"><path d="M45 15 L25 55 H45 L35 85 L70 40 H50 Z" fill="white"/></svg>';const H='<svg viewBox="0 0 100 100"><rect x="25" y="28" width="50" height="40" fill="none" stroke="white" stroke-width="6"/></svg>';const F='<svg viewBox="0 0 100 100"><rect x="25" y="25" width="50" height="50" fill="none" stroke="white" stroke-width="6"/></svg>';const C='<svg viewBox="0 0 100 100"><rect x="20" y="40" width="50" height="20" fill="white"/><circle cx="35" cy="65" r="8" fill="white"/><circle cx="65" cy="65" r="8" fill="white"/></svg>';const cards=[['wind1',W,'Windrad / Solaranlage','green','Start'],['wind2',W,'Windrad / Solaranlage','green','Start'],['akku',B,'Akku laden','blue','η = 90 %'],['motor1',M,'Elektromotor','blue','η = 90 %'],['move1',C,'Fahrzeugbewegung','gray',''],['ely',E,'Elektrolyse','orange','η = 70 %'],['tank',H,'H₂-Speicherung','orange','η = 90 %'],['bz',F,'Brennstoffzelle','orange','η = 55 %'],['motor2',M,'Elektromotor','orange','η = 90 %'],['move2',C,'Fahrzeugbewegung','gray','']];const evSol=['wind1','akku','motor1','move1'];const fcSol=['wind2','ely','tank','bz','motor2','move2'];for(let i=0;i<4;i++)ev.innerHTML+='<div class=slot></div>';for(let i=0;i<6;i++)fc.innerHTML+='<div class=slot></div>';function fy(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}let selected=null;function render(){pool.innerHTML='';fy([...cards]).forEach(c=>makeCard(c,pool));bindSlots()}function makeCard(c,parent){let d=document.createElement('div');d.className='card '+c[3];d.dataset.id=c[0];d.innerHTML=c[1]+'<div>'+c[2]+'</div>'+(c[4]?'<div class=eta>'+c[4]+'</div>':'');d.onclick=()=>selectCard(d);parent.appendChild(d)}function selectCard(c){document.querySelectorAll('.card').forEach(x=>x.classList.remove('selected'));selected=c;c.classList.add('selected')}function bindSlots(){document.querySelectorAll('.slot').forEach(s=>s.onclick=()=>{if(selected&&!s.firstChild){s.appendChild(selected);selected.classList.remove('selected');selected=null;}});pool.onclick=e=>{if(selected&&e.target===pool){pool.appendChild(selected);selected.classList.remove('selected');selected=null;}}}function shuffleCards(){document.querySelectorAll('.slot').forEach(s=>{if(s.firstChild)pool.appendChild(s.firstChild)});render()}function ids(id){return [...document.querySelectorAll('#'+id+' .slot')].map(s=>s.firstChild?s.firstChild.dataset.id:'')}function checkEV(){evr.textContent=JSON.stringify(ids('ev'))===JSON.stringify(evSol)?'✅ korrekt':'❌ noch nicht korrekt'}function checkFC(){fcr.textContent=JSON.stringify(ids('fc'))===JSON.stringify(fcSol)?'✅ korrekt':'❌ noch nicht korrekt'}function showSolution(){document.querySelectorAll('#ev .slot').forEach((s,i)=>{let c=document.querySelector('[data-id="'+evSol[i]+'"]');if(c)s.appendChild(c)});document.querySelectorAll('#fc .slot').forEach((s,i)=>{let c=document.querySelector('[data-id="'+fcSol[i]+'"]');if(c)s.appendChild(c)})}render();</script>
+<script>
+(function(){
+let selected=null;
+document.addEventListener("click",function(e){
+ const card=e.target.closest(".card");
+ const slot=e.target.closest(".slot");
+ const pool=document.getElementById("pool");
+ if(card){
+   document.querySelectorAll(".card").forEach(c=>c.classList.remove("selected"));
+   selected=card;
+   card.classList.add("selected");
+   return;
+ }
+ if(slot && selected){
+   if(slot.firstElementChild && slot.firstElementChild!==selected){
+      pool.appendChild(slot.firstElementChild);
+   }
+   slot.appendChild(selected);
+   selected.classList.remove("selected");
+   selected=null;
+   return;
+ }
+ if(pool && e.target===pool && selected){
+   pool.appendChild(selected);
+   selected.classList.remove("selected");
+   selected=null;
+ }
+},true);
+})();
+</script>
+</body></html>
